@@ -39,16 +39,16 @@ func run() error {
 		}
 
 	case "gentoken":
-		id := flag.Arg(1)
+		kid := flag.Arg(1)
 		privateKeyFile := "private.pem"
 		algorithm := "RS256"
-		if err := GenToken(privateKeyFile, id, algorithm); err != nil {
+		if err := GenToken(privateKeyFile, kid, algorithm); err != nil {
 			return errors.Wrap(err, "key generation")
 		}
 
 	default:
 		fmt.Println("genkey: generate a set of private/public key files")
-		fmt.Println("gentoken: generate a JWT for a user with claims")
+		fmt.Println("gentoken: generate a JWT for a user with claims. You also need to specify an unique kid after gentoken command")
 		fmt.Println("provide a command to get more help.")
 
 		return ErrHelp
