@@ -39,9 +39,10 @@ func run() error {
 		}
 
 	case "gentoken":
+		id := flag.Arg(1)
 		privateKeyFile := "private.pem"
 		algorithm := "RS256"
-		if err := GenToken(privateKeyFile, algorithm); err != nil {
+		if err := GenToken(privateKeyFile, id, algorithm); err != nil {
 			return errors.Wrap(err, "key generation")
 		}
 
@@ -57,7 +58,7 @@ func run() error {
 }
 
 // GenToken generates a JWT for the specified user.
-func GenToken(privateKeyFile string, algorithm string) error {
+func GenToken(privateKeyFile string, kid string, algorithm string) error {
 	pkf, err := os.Open(privateKeyFile)
 	if err != nil {
 		return errors.Wrap(err, "opening PEM private key file")
@@ -73,6 +74,11 @@ func GenToken(privateKeyFile string, algorithm string) error {
 		return errors.Wrap(err, "parsing PEM into private key")
 	}
 
+	a, err := service.NewAuth(algorithm, &service.KeyStore{Pk: privateKey})
+	if err != nil {
+		return errors.Wrap(err, "constructing auth")
+	}
+
 	claims := service.Claims{
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    "go microservice",
@@ -82,14 +88,12 @@ func GenToken(privateKeyFile string, algorithm string) error {
 		},
 	}
 
-	method := jwt.GetSigningMethod(algorithm)
-	token := jwt.NewWithClaims(method, claims)
-	str, err := token.SignedString(privateKey)
+	token, err := a.GenerateToken(kid, claims)
 	if err != nil {
-		log.Fatalln(err)
+		return errors.Wrap(err, "generating token")
 	}
 
-	fmt.Printf("-----BEGIN TOKEN-----\n%s\n-----END TOKEN-----\n", str)
+	fmt.Printf("-----BEGIN TOKEN-----\n%s\n-----END TOKEN-----\n", token)
 
 	return nil
 }

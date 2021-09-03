@@ -6,5 +6,7 @@ RUN make -C /app/grpc-service/cmd/server
 
 FROM alpine:latest
 
+COPY --from=builder /app/grpc-service/*.pem .
 COPY --from=builder /app/grpc-service/cmd/server/server /app/server
+
 CMD ["/app/server"]

@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/pkg/errors"
+	"log"
 )
 
 type Claims struct {
@@ -46,12 +47,14 @@ func NewAuth(algorithm string, keyLookup KeyLookup) (*Auth, error) {
 	keyFunc := func(t *jwt.Token) (interface{}, error) {
 		kid, ok := t.Header["kid"]
 		if !ok {
+			log.Printf("missing key id (kid) in token header")
 			return nil, errors.New("missing key id (kid) in token header")
 		}
 		kidID, ok := kid.(string)
 		if !ok {
 			return nil, errors.New("user token key id (kid) must be string")
 		}
+		log.Printf("all ok until keylookup publickey")
 		return keyLookup.PublicKey(kidID)
 	}
 
@@ -90,10 +93,12 @@ func (a *Auth) ValidateToken(tokenStr string) (Claims, error) {
 	var claims Claims
 	token, err := a.parser.ParseWithClaims(tokenStr, &claims, a.keyFunc)
 	if err != nil {
+		log.Printf("parsing token: %v", err)
 		return Claims{}, errors.Wrap(err, "parsing token")
 	}
 
 	if !token.Valid {
+		log.Printf("invalid token: %v", err)
 		return Claims{}, errors.New("invalid token")
 	}
 
@@ -101,10 +106,12 @@ func (a *Auth) ValidateToken(tokenStr string) (Claims, error) {
 }
 
 func (a *Auth) Check(key string) (bool, string) {
+	log.Printf("token key: %v", key)
 	claims, err := a.ValidateToken(key)
 	if err != nil {
 		return false, ""
 	}
+
 	return true, claims.Subject
 }
 

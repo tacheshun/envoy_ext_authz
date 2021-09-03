@@ -1,13 +1,14 @@
 package main
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
 	"flag"
 	"fmt"
+	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/tacheshun/envoy_ext_authz/internal/service"
+	"io"
 	"log"
 	"net"
+	"os"
 
 	envoy_service_auth_v3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	authv3 "github.com/tacheshun/envoy_ext_authz/internal/auth"
@@ -23,10 +24,22 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen to %d: %v", *port, err)
 	}
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	privateKeyFile := "private.pem"
+	pkf, err := os.Open(privateKeyFile)
 	if err != nil {
-		log.Fatalf("failed to generate key %v", err)
+		log.Fatalf( "opening PEM private key file")
 	}
+	defer pkf.Close()
+	privatePEM, err := io.ReadAll(io.LimitReader(pkf, 1024*1024))
+	if err != nil {
+		log.Fatalf( "reading PEM private key file")
+	}
+
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privatePEM)
+	if err != nil {
+		log.Fatalf( "parsing PEM into private key")
+	}
+
 	grpcServer := grpc.NewServer()
 	serviceAuth, err := service.NewAuth("RS256",  &service.KeyStore{Pk: privateKey})
 	if err != nil {

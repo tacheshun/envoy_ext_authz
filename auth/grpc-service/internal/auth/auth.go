@@ -8,6 +8,7 @@ import (
 	"github.com/tacheshun/envoy_ext_authz/internal/service"
 	"google.golang.org/genproto/googleapis/rpc/code"
 	"google.golang.org/genproto/googleapis/rpc/status"
+	"log"
 	"strings"
 )
 
@@ -31,6 +32,8 @@ func (s *AuthorizationServer) Check(
 	extracted := strings.Fields(authorization)
 	if len(extracted) == 2 && extracted[0] == "Bearer" {
 		valid, user := s.auth.Check(extracted[1])
+		log.Printf("is valid?: %v", valid)
+		log.Printf("user: %v", user)
 		if valid {
 			return &envoy_service_auth_v3.CheckResponse{
 				HttpResponse: &envoy_service_auth_v3.CheckResponse_OkResponse{
