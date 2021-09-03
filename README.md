@@ -4,7 +4,7 @@
 ## Requirements
 - you will need Docker installed
 
-## Setup
+## Setup and run
 
 - run `docker-compose up -d --build`
 - generate a jwt using the public and private keys provided in the repository by using the admin tool inside auth/grpc-service: 
