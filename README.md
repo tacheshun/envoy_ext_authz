@@ -3,6 +3,7 @@
 
 ## Requirements
 - you will need Docker installed
+- (optional) golang installed on local machine if you want to use go admin tool for keypair and/or token generation
 
 ## Setup and run
 
