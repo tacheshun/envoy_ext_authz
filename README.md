@@ -1,6 +1,9 @@
 # Envoy Ext_Authz
 - Envoy External Authorization Filter for validating JSON Web Tokens
 
+[![Build Status](https://img.shields.io/github/workflow/status/tacheshun/envoy_ext_authz/build)](https://github.com/tacheshun/envoy_ext_authz/actions?query=branch%3Amaster)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tacheshun/envoy_ext_authz)](https://goreportcard.com/report/github.com/tacheshun/envoy_ext_authz)
+
 ## Requirements
 - you will need Docker installed
 - (optional) golang installed on local machine if you want to use go admin tool for keypair and/or token generation
